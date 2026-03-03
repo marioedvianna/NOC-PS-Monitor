@@ -1,3 +1,5 @@
 /logs/*.csv
 !/logs/.gitkeep
 .vscode/
+/config/targets.json
+*.log

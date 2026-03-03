@@ -1,3 +1,20 @@
+# --- FUNÇÃO DE ALERTA ---
+function Send-TelegramAlert {
+    param([string]$Mensagem)
+    
+    $token = $config.Configuracoes.TelegramToken
+    $chatId = $config.Configuracoes.ChatID
+    $url = "https://api.telegram.org/bot$token/sendMessage"
+    
+    $body = @{
+        chat_id = $chatId
+        text = $Mensagem
+        parse_mode = "HTML"
+    }
+
+    Invoke-RestMethod -Uri $url -Method Post -Body $body | Out-Null
+}
+
 # Carrega as configurações (garantindo o caminho correto)
 $configPath = "$PSScriptRoot/../config/targets.json"
 $config = Get-Content $configPath | ConvertFrom-Json
@@ -22,6 +39,7 @@ $relatorio = foreach ($item in $config.Servidores) {
         Servidor  = $item.Nome
         Conexao   = if ($ping) { "Online" } else { "Offline" }
         StatusSvc = $statusSvc
+        IP        = $item.IP
         service   = $item.Servico
     }
 }
@@ -32,19 +50,40 @@ $totalCritico = 0
 
 
 foreach ($linha in $relatorio) {
-   # 1. Se ambos estão OK 
+    # 1. TUDO OK: Não precisa mandar mensagem (silêncio é ouro no NOC)
     if ($linha.Conexao -eq "Online" -and $linha.StatusSvc -eq "Running") {
-        Write-Host "[OK] O monitoramento de PING e do SERVIÇO ($($linha.service)) de $($linha.Servidor) está operando normalmente." -ForegroundColor Green
+        Write-Host "[OK] ..." -ForegroundColor Green
         $totalOK++
-    }
-    # 2. Se o Ping está OK, mas o Serviço deu erro
+    } 
+    
+    # 2. ALERTA: O servidor respira, mas a aplicação (serviço) morreu
     elseif ($linha.Conexao -eq "Online" -and $linha.StatusSvc -ne "Running") {
-        Write-Host "[ALERTA] Servidor $($linha.Servidor) responde ao PING, mas o SERVIÇO ($($linha.service)) está: $($linha.StatusSvc)." -ForegroundColor Yellow
+        $msg = "⚠️ <b>ALERTA DE SERVIÇO</b> ⚠️`n`n" +
+            "<b>Servidor:</b> $($linha.Servidor)`n" +
+            "<b>IP:</b> $($linha.IP)`n" +
+            "<b>Serviço:</b> $($linha.service)`n" +
+            "<b>Status:</b> $($linha.StatusSvc)" 
+
+        if ($config.Configuracoes.EnviarAlerta -eq "Sim") { 
+            Send-TelegramAlert -Mensagem $msg 
+        }
+
+        Write-Host "[ALERTA] ..." -ForegroundColor Yellow
         $totalAlerta++
     }
-    # 3. Se não responde o Ping
+    
+    # 3. CRÍTICO: O servidor parou de responder (Queda de Rede/Energia)
     else {
-        Write-Host "[CRÍTICO] O monitoramento de REDE (PING) de $($linha.Servidor) falhou! (Servidor Offline)" -ForegroundColor Red
+        $msg = "🚨 <b>FALHA CRÍTICA: OFFLINE</b> 🚨`n`n" +
+            "<b>Servidor:</b> $($linha.Servidor)`n" +
+            "<b>IP:</b> $($linha.IP)`n" +
+            "<b>Status:</b> SEM RESPOSTA (PING)"  
+
+        if ($config.Configuracoes.EnviarAlerta -eq "Sim") { 
+            Send-TelegramAlert -Mensagem $msg 
+        }
+
+        Write-Host "[CRÍTICO] ..." -ForegroundColor Red
         $totalCritico++
     }
 }
