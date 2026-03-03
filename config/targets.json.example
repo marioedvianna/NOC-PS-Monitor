@@ -3,6 +3,7 @@
         "TelegramToken": "SEU_TOKEN_AQUI",
         "ChatID": "SEU_ID_AQUI",
         "EnviarAlerta": "Sim"
+        "AutoHealing": "Sim"
     },
     "Servidores": [
         { "Nome": "Exemplo", "IP": "127.0.0.1", "Servico": "Spooler" }

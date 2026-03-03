@@ -1,81 +1,73 @@
 
-# 🛡️ NOC-PS-Monitor (Versão 2.0 - Alertas Inteligentes)
+# 🛡️ NOC-PS-Monitor (v3.0 - Self-Healing Edition)
 
-O **NOC-PS-Monitor** é uma solução de monitoramento de ativos e serviços desenvolvida em PowerShell, focada em alta disponibilidade e resposta rápida a incidentes.
+O **NOC-PS-Monitor** é uma solução de **Engenharia de Confiabilidade (SRE)** e monitoramento de ativos desenvolvida em PowerShell. O projeto evoluiu de um simples verificador de status para uma ferramenta de automação inteligente capaz de diagnosticar e recuperar serviços críticos sem intervenção humana.
 
-> **Status Atual:** 🚀 Fase 2 - Integração com APIs de Mensageria (Telegram) concluída.
+> **Status Atual:** 🚀 **Fase 3 Concluída** - Implementação de Auto-Healing e Refatoração de Código.
 
 ----------
 
-### 🚀 Novas Funcionalidades (Fase 2)
+### 🛠️ Evolução do Projeto (Changelog)
 
--   **Notificações em Tempo Real:** Integração nativa com a **API do Telegram** para envio de alertas instantâneos.
+#### **Fase 1: A Fundação (Monitoramento Core)**
+
+-   **Monitoramento Híbrido:** Validação de conectividade (ICMP/Ping) e status de serviços Windows.
     
--   **Inteligência de Alerta (Multinível):**
+-   **Arquitetura Modular:** Separação total entre lógica de execução e dados de configuração (JSON).
     
-    -   🟢 **Saudável:** Registro silencioso em log para evitar ruído.
+-   **Logs de Auditoria:** Geração de arquivos `.csv` para análise histórica e conformidade.
+    
+
+#### **Fase 2: Conectividade e Alertas (Telegram API)**
+
+-   **Notificações em Tempo Real:** Integração com a **API do Telegram** para alertas instantâneos no celular.
+    
+-   **Alertas Multinível:** Diferenciação visual entre **Saudável** (OK), **Serviço Parado** (Warning) e **Host Offline** (Critical).
+    
+-   **Segurança de Dados:** Implementação de boas práticas de _Secrets Management_ com `.gitignore` e modelos de configuração (`.example`).
+    
+
+#### **Fase 3: Automação Inteligente (Auto-Healing)**
+
+-   **Recuperação Automática:** O script tenta reiniciar serviços parados automaticamente antes de escalar o incidente.
+    
+-   **Lógica de Confirmação:** Validação de status pós-reparo para garantir que a aplicação subiu corretamente.
+    
+-   **Código Refatorado:** Implementação de tratamento de erros (`Try/Catch`) e otimização do fluxo de mensagens.
+    
+
+----------
+
+### 📂 Estrutura do Repositório
+
+**Pasta**
+
+**Conteúdo**
+
+`src/`
+
+`Monitor-NOC.ps1` (Script principal refatorado).
+
+`config/`
+
+Configurações de alvos e credenciais da API.
+
+`logs/`
+
+Histórico de eventos e ações de recuperação.
+
+----------
+
+### 🚀 Como Rodar o Sistema
+
+1.  **Configuração Inicial:**
+    
+    -   Renomeie `config/targets.json.example` para `config/targets.json`.
         
-    -   🟡 **Alerta (Warning):** Disparo de notificação quando o servidor responde ao Ping, mas o serviço crítico está parado.
+    -   Configure seu **Token do Telegram**, **ChatID** e ative o `AutoHealing` como `"Sim"`.
         
-    -   🔴 **Crítico:** Disparo de prioridade máxima quando há perda total de conectividade com o host.
+2.  **Execução:**
+    
+    -   Abra o PowerShell como Administrador.
         
--   **Mensagens em HTML:** Formatação avançada de alertas para facilitar a leitura via dispositivos móveis (Mobile-First).
-    
--   **Gestão de Segredos (Secrets Management):** Implementação de boas práticas de segurança, utilizando `.gitignore` e arquivos de exemplo (`.example`) para proteção de tokens e credenciais.
-    
-
-----------
-
-### 📂 Estrutura do Projeto Atualizada
-
-Plaintext
-
-```
-NOC-PS-Monitor/
-├── config/
-│   ├── targets.json           # Configurações locais (Ignorado pelo Git)
-│   └── targets.json.example   # Modelo para novos deploys
-├── src/
-│   └── Monitor-NOC.ps1        # Core do sistema com integração API
-├── logs/                      # Histórico de eventos (CSV)
-└── README.md
-
-```
-
-----------
-
-### 🛠️ Configuração dos Alertas (Telegram)
-
-Para habilitar as notificações, siga os passos:
-
-1.  Crie um bot no Telegram via **@BotFather** e obtenha seu Token.
-    
-2.  Obtenha seu Chat ID.
-    
-3.  Renomeie o arquivo `config/targets.json.example` para `config/targets.json`.
-    
-4.  Preencha as chaves `TelegramToken` e `ChatID` no arquivo.
-    
-
-JSON
-
-```
-"Configuracoes": {
-    "TelegramToken": "SEU_TOKEN_AQUI",
-    "ChatID": "SEU_ID_AQUI",
-    "EnviarAlerta": "Sim"
-}
-
-```
-
-----------
-
-### 📈 Roadmap de Evolução
-
--   [x] **Fase 1:** Monitoramento base e logs locais.
-    
--   [x] **Fase 2:** Integração com Telegram API e Alertas Multinível.
-    
--   [ ] **Fase 3:** **Auto-Healing** (Recuperação automática de serviços).
-    
--   [ ] **Fase 4:** Dashboard de Observabilidade em HTML.
+    -   Execute: `.\src\Monitor-NOC.ps1`
