@@ -1,0 +1,8 @@
+{
+    "Servidores": [
+        { "Nome": "Minha Estacao", "IP": "127.0.0.1", "Servico": "lfsvc" },
+        { "Nome": "Minha Estacao", "IP": "127.0.0.1", "Servico": "Spooler" },
+        { "Nome": "Servico Fantasma", "IP": "127.0.0.1", "Servico": "ServicoQueNaoExiste" },
+        { "Nome": "IP Inexistente", "IP": "192.168.254.254", "Servico": "QualquerUm" }
+    ]
+}
